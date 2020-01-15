@@ -1,4 +1,5 @@
    - name: Deploy a web app
      hosts: slave1,slave2
      tasks:
-        - name: ping
+        - name: Try ping
+          ping:
