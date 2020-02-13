@@ -1,14 +1,16 @@
-   - name: Deploy a web app
+   - name: Add monitoring to a Instilled APP Server
      hosts: slave1,slave2
      tasks:
-        - name:  Install dependices
-          apt: name {{ item }} state=installed
-          with_items:
-            - python
-            - python-setuptools
-            - python-dev
-            - build-essential
-            - python-pip
+        - name: Copy a new setenv.sh to add monitoring to java startup.
+          copy:
+            src: /tmp/setenv.sh
+            dest: /usr/local/kzo/apps/bin/
+            owner: root
+            group: root
+            mode: '0644'
+          backup: yes    
+          backup_file: setenv.bak
+ 
 
      tasks:
         - name:  Install mysql dependices
@@ -25,7 +27,15 @@
             enabled: yes
 
  
-       
+   - name: Copy a new setenv.sh to add monitoring to java startup.
+     copy:
+       src: /tmp/setenv.sh
+       dest: /usr/local/kzo/apps/bin/
+       owner: root
+       group: root
+       mode: '0644'
+     backup: yes    
+     backup_file: setenv.bak
        
        
        
