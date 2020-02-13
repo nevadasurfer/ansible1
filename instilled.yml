@@ -1,0 +1,32 @@
+   - name: Deploy a web app
+     hosts: slave1,slave2
+     tasks:
+        - name:  Install dependices
+          apt: name {{ item }} state=installed
+          with_items:
+            - python
+            - python-setuptools
+            - python-dev
+            - build-essential
+            - python-pip
+
+     tasks:
+        - name:  Install mysql dependices
+          apt: name {{ item }} state=installed
+          with_items:
+            - mysql-server
+            - mysql-client
+                   
+      tasks:
+        - name: Restarting MYSQL
+          service:
+            name: mysql
+            state: started
+            enabled: yes
+
+ 
+       
+       
+       
+       
+       
