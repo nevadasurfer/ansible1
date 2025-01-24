@@ -1,0 +1,39 @@
+---
+-name:DeployGoApp
+ hosts:go_servers
+ become:yes
+ vars:
+  app_repo:https://github.com/example/go-app.git
+  app_dir:/opt/go-app
+  binary_name:app
+ tasks:
+  -name:InstallGo
+   apt:
+    name:golang-go
+    state:present
+    update_cache:yes
+  -name:CloneApplicationRepository
+   git:
+    repo:"{{app_repo}}"
+    dest:"{{app_dir}}"
+    version:main
+  -name:BuildGoApplication
+   command:go build -o {{binary_name}}
+   args:
+    chdir:"{{app_dir}}"
+  -name:ConfigureSystemd Service
+   template:
+    src:templates/go_app.service.j2
+    dest:/etc/systemd/system/go_app.service
+   notify:
+    -RestartGoApp
+  -name:EnableAndStartGoApp Service
+   systemd:
+    name:go_app
+    state:started
+    enabled:yes
+ handlers:
+  -name:RestartGoApp
+   systemd:
+    name:go_app
+    state:restarted
