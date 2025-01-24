@@ -1,0 +1,34 @@
+---
+-name:ProvisionGCPVM
+ hosts:localhost
+ gather_facts:no
+ vars:
+  gcp_project:my-gcp-project
+  gcp_zone:us-central1-a
+  vm_name:my-gcp-vm
+  machine_type:e2-medium
+  image_family:debian-10
+  image_project:debian-cloud
+ tasks:
+  -name:CreateGCPVM
+   gcp_compute_instance:
+    project:"{{gcp_project}}"
+    zone:"{{gcp_zone}}"
+    name:"{{vm_name}}"
+    machine_type:"{{machine_type}}"
+    disks:
+     -auto_delete:true
+      boot:true
+      initialize_params:
+       source_image:"projects/{{image_project}}/global/images/family/{{image_family}}"
+    network_interfaces:
+     -network:default
+      access_configs:
+       -name:External NAT
+        type:ONE_TO_ONE_NAT
+    state:present
+   register:gcp_vm
+  -name:AddVMToHostGroup
+   add_host:
+    hostname:"{{gcp_vm.instance.network_interfaces[0].access_configs[0].nat_ip}}"
+    groups:gcp_hosts
