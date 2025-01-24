@@ -1,0 +1,34 @@
+---
+-name:SetupRedisCluster
+ hosts:redis_nodes
+ become:yes
+ vars:
+  redis_port:6379
+  cluster_enabled:yes
+  cluster_config_file:nodes.conf
+  cluster_node_timeout:5000
+ tasks:
+  -name:InstallRedis
+   apt:
+    name:redis-server
+    state:present
+    update_cache:yes
+  -name:ConfigureRedisCluster
+   template:
+    src:templates/redis.conf.j2
+    dest:/etc/redis/redis.conf
+   notify:
+    -RestartRedis
+  -name:StartRedisService
+   service:
+    name:redis-server
+    state:started
+    enabled:yes
+  -name:CreateRedisCluster
+   command:redis-cli --cluster create {% for host in groups['redis_nodes'] %}{{hostvars[host].ansible_host}}:{{redis_port}} {% endfor %} --cluster-replicas 1
+   when: inventory_hostname == groups['redis_nodes'][0]
+ handlers:
+  -name:RestartRedis
+   service:
+    name:redis-server
+    state:restarted
